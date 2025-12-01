@@ -71,5 +71,5 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
+  postgres_data_new:
   redis_data:
