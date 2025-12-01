@@ -1,0 +1,1 @@
+from web_app.src.models.legislation import Base, Authority, DataLegislation

@@ -1,0 +1,12 @@
+# Файлы Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Файлы venv
+.venv/
+
+# Файлы IDE
+.idea/

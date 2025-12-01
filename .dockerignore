@@ -1,0 +1,17 @@
+# Файлы Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Файлы venv
+.venv/
+
+# Файлы IDE
+.idea/
+
+# Докер
+Dockerfile
+docker-compose.yml
+.dockerignore
