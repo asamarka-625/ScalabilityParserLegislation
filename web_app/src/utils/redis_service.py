@@ -226,8 +226,10 @@ class RedisService:
 
         for key in worker_keys:
             worker_data = await self.redis.hgetall(key)
-            worker_data["first_connection_time"] = worker_data["first_connection_time"].strftime("%d %B %Y %H:%M:%S")
-            worker_data["last_connection_time"] = worker_data["first_connection_time"].strftime("%d %B %Y %H:%M:%S")
+            dt_first_connection_time = datetime.fromisoformat(worker_data["first_connection_time"])
+            dt_last_connection_time = datetime.fromisoformat(worker_data["last_connection_time"])
+            worker_data["first_connection_time"] = dt_first_connection_time.strftime("%d %B %Y %H:%M:%S")
+            worker_data["last_connection_time"] = dt_last_connection_time.strftime("%d %B %Y %H:%M:%S")
 
             workers_info.append(worker_data)
             total_processed += int(worker_data.get('total_processed_data', 0))
