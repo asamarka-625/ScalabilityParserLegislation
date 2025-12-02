@@ -1,11 +1,12 @@
 # Внешние зависимости
 from typing import List
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 # Внутренние модули
 from web_app.src.crud import sql_get_info, sql_get_legislation_ids
-from web_app.src.schemas import InfoWorkerResponse, PingWorkerRequest, RemoveWorkerRequest, LegislationWorkerRequest
+from web_app.src.schemas import InfoWorkerResponse, PingWorkerRequest, LegislationWorkerRequest
 from web_app.src.utils import redis_service
+from web_app.src.dependencies import get_client_ip
 
 
 router = APIRouter(
@@ -62,7 +63,10 @@ async def get_info_from_workers():
     response_class=JSONResponse,
     summary="Возвращаем ids законопроектов, которые можно обработать"
 )
-async def get_legislation_ids(data: LegislationWorkerRequest):
+async def get_legislation_ids(
+    data: LegislationWorkerRequest,
+    client_ip: str = Depends(get_client_ip)
+):
     reservation_legislation_ids = await redis_service.get_legislation_ids()
 
     legislation_ids = await sql_get_legislation_ids(
@@ -71,7 +75,7 @@ async def get_legislation_ids(data: LegislationWorkerRequest):
     )
 
     await redis_service.ping_worker(
-        ip=data.ip,
+        ip=client_ip,
         processed_data=0,
         legislation_ids=legislation_ids
     )
@@ -84,8 +88,11 @@ async def get_legislation_ids(data: LegislationWorkerRequest):
     response_class=JSONResponse,
     summary="Пингуем обработчик"
 )
-async def ping_worker(data: PingWorkerRequest):
-    await redis_service.ping_worker(**data.model_dump())
+async def ping_worker(
+    data: PingWorkerRequest,
+    client_ip: str = Depends(get_client_ip)
+):
+    await redis_service.ping_worker(ip=client_ip, **data.model_dump())
     return {"status": "success"}
 
 
@@ -94,6 +101,6 @@ async def ping_worker(data: PingWorkerRequest):
     response_class=JSONResponse,
     summary="Удаляем обработчик"
 )
-async def delete_worker(data: RemoveWorkerRequest):
-    message = await redis_service.delete_worker(ip=data.ip)
+async def delete_worker(client_ip: str = Depends(get_client_ip)):
+    message = await redis_service.delete_worker(ip=client_ip)
     return {"message": message}

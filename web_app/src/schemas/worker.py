@@ -14,17 +14,10 @@ class InfoWorkerResponse(BaseModel):
 
 # Схема запроса для получения ids законопроектов
 class LegislationWorkerRequest(BaseModel):
-    ip: Annotated[str, Field(strict=True, strip_whitespace=True)]
     limit: Annotated[int, Field(ge=1)]
 
 
 # Схема запроса пинга обработчика
 class PingWorkerRequest(BaseModel):
-    ip: Annotated[str, Field(strict=True, strip_whitespace=True)]
     processed_data: Annotated[int, Field(ge=0)]
     expire_seconds: Annotated[int, Field(ge=1)]
-
-
-# Схема запроса удаления обработчика
-class RemoveWorkerRequest(BaseModel):
-    ip: Annotated[str, Field(strict=True, strip_whitespace=True)]

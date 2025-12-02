@@ -1,0 +1,1 @@
+from web_app.src.dependencies.depends_ip import get_client_ip
