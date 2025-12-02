@@ -72,7 +72,7 @@ services:
         max-file: "3"
     networks:
       - app-network
-      -
+
 networks:
   app-network:
     driver: bridge
