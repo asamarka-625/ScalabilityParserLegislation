@@ -39,7 +39,7 @@ class RedisService:
         """Увеличиваем счетчик выгруженных данных"""
         await self.redis.incrby(self.total_unloaded_data_key, unloaded_count)
 
-    async def get_unloaded_data(self):
+    async def get_total_unloaded_data(self):
         """Получаем количество выгруженных данных"""
         total_unloaded_count = await self.redis.get(self.total_unloaded_data_key)
         return int(total_unloaded_count) if total_unloaded_count is not None else 0
