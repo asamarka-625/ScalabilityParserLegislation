@@ -45,6 +45,11 @@ services:
       postgres
       -c config_file=/etc/postgresql/postgresql.conf
       -c hba_file=/var/lib/postgresql/data/pg_hba.conf
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - app-network
 
@@ -65,7 +70,9 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
+    networks:
+      - app-network
+      -
 networks:
   app-network:
     driver: bridge
