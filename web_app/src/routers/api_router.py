@@ -61,10 +61,14 @@ async def get_info_from_workers():
 async def get_legislation_ids(data: LegislationWorkerRequest):
     reservation_legislation_ids = await redis_service.get_legislation_ids()
 
-    legislation_ids = await sql_get_legislation_ids(
-        reservation_legislation_ids=reservation_legislation_ids,
-        limit=data.limit
-    )
+    if reservation_legislation_ids:
+        legislation_ids = await sql_get_legislation_ids(
+            reservation_legislation_ids=reservation_legislation_ids,
+            limit=data.limit
+        )
+
+    else:
+        legislation_ids = []
 
     await redis_service.ping_worker(
         ip=data.ip,

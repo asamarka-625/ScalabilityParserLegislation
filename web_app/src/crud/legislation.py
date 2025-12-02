@@ -51,7 +51,7 @@ async def sql_get_legislation_ids(
         legislation_ids_result = await session.execute(
             sa.select(DataLegislation.id)
             .where(
-                DataLegislation.id.not_in_(reservation_legislation_ids),
+                DataLegislation.id.notin_(reservation_legislation_ids),
                 DataLegislation.binary_pdf != None,
                 DataLegislation.text == None
             )
