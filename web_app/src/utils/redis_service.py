@@ -55,7 +55,7 @@ class RedisService:
             # Сериализуем список в JSON для хранения в Redis
             combined_ids_json = json.dumps(combined_ids)
 
-            await self.redis.setex(
+            await self.redis.set(
                 self.legislation_ids_key,
                 combined_ids_json
             )
@@ -64,16 +64,16 @@ class RedisService:
         current_time = datetime.now().isoformat()
 
         if await self.redis.exists(key):
-            pipeline = self.redis.pipeline()
-            pipeline.hincrby(key, 'total_processed_data', processed_data)
-            pipeline.hset(key, 'last_connection_time', current_time)
+            async with self.redis.pipeline() as pipeline:
+                await pipeline.hincrby(key, 'total_processed_data', processed_data)
+                await pipeline.hset(key, 'last_connection_time', current_time)
 
-            if legislation_ids is not None:
-                legislation_ids_json = json.dumps(legislation_ids)
-                pipeline.hset(key, 'legislation_ids', legislation_ids_json)
+                if legislation_ids is not None:
+                    legislation_ids_json = json.dumps(legislation_ids)
+                    await pipeline.hset(key, 'legislation_ids', legislation_ids_json)
 
-            pipeline.expire(key, expire_seconds)
-            await pipeline.execute()
+                await pipeline.expire(key, expire_seconds)
+                await pipeline.execute()
 
         else:
             worker_data = {
@@ -87,10 +87,10 @@ class RedisService:
                 legislation_ids_json = json.dumps(legislation_ids)
                 worker_data['legislation_ids'] = legislation_ids_json
 
-            pipeline = self.redis.pipeline()
-            await self.redis.hset(key, mapping=worker_data)
-            await self.redis.expire(key, expire_seconds)
-            await pipeline.execute()
+            async with self.redis.pipeline() as pipeline:
+                await pipeline.hset(key, mapping=worker_data)
+                await pipeline.expire(key, expire_seconds)
+                await pipeline.execute()
 
     async def delete_worker(self, ip: str) -> str:
         """Удаление обработчика по IP с обновлением списка legislation_ids"""
@@ -137,10 +137,10 @@ class RedisService:
                             if id_ not in valid_legislation_ids
                         ]
                         updated_ids_json = json.dumps(updated_ids)
-                        pipe.set(self.legislation_ids_key, updated_ids_json)
+                        await pipe.set(self.legislation_ids_key, updated_ids_json)
 
                 # Удаляем воркера
-                pipe.delete(key)
+                await pipe.delete(key)
 
                 # Выполняем транзакцию
                 await pipe.execute()
