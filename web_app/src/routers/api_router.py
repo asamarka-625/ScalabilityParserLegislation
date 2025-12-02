@@ -28,11 +28,11 @@ async def get_info_from_db():
         "Записей с бинарными данными документов": stats["has_binary_pdf"],
         "Записей с текстом документов": stats["has_text"],
         "Записей выгруженных из бд": total_unloaded_count,
-        "Процент бинарных данных": f"{(stats["has_binary_pdf"] + stats["loaded"]) / stats["total"] \
+        "Процент бинарных данных": f"{(stats["has_binary_pdf"] + total_unloaded_count) / stats["total"] \
             if stats["total"] > 0 else 0}%",
-        "Процент текстовых данных": f"{(stats["has_text"] + stats["loaded"]) / stats["total"] \
+        "Процент текстовых данных": f"{(stats["has_text"] + total_unloaded_count) / stats["total"] \
             if stats["total"] > 0 else 0}%",
-        "Процент выгруженных данных": f"{stats["loaded"] / stats["total"] \
+        "Процент выгруженных данных": f"{total_unloaded_count / stats["total"] \
             if stats["total"] > 0 else 0}%"
     }
 

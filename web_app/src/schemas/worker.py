@@ -1,15 +1,14 @@
 # Внешние зависимости
 from typing import Annotated
-from datetime import datetime, timedelta
 from pydantic import BaseModel, Field
 
 
 # Схема получения информации об обработчике
 class InfoWorkerResponse(BaseModel):
     ip: Annotated[str, Field(strict=True, strip_whitespace=True)]
-    first_connection_time: datetime
-    last_connection_time: datetime
-    active_time: timedelta
+    first_connection_time: Annotated[str, Field(strict=True, strip_whitespace=True)]
+    last_connection_time: Annotated[str, Field(strict=True, strip_whitespace=True)]
+    active_time: Annotated[str, Field(strict=True, strip_whitespace=True)]
     total_processed_data: Annotated[int, Field(ge=0)]
 
 

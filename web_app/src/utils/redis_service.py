@@ -207,9 +207,9 @@ class RedisService:
 
             info = InfoWorkerResponse(
                 ip=worker_data["ip"],
-                first_connection_time=first_connection_time,
-                last_connection_time=last_connection_time,
-                active_time=last_connection_time - first_connection_time,
+                first_connection_time=first_connection_time.strftime("%d %B %Y %H:%M:%S"),
+                last_connection_time=last_connection_time.strftime("%d %B %Y %H:%M:%S"),
+                active_time=(datetime.min + (last_connection_time - first_connection_time)).strftime("%H:%M:%S"),
                 total_processed_data=worker_data["total_processed_data"]
             )
 
@@ -226,6 +226,9 @@ class RedisService:
 
         for key in worker_keys:
             worker_data = await self.redis.hgetall(key)
+            worker_data["first_connection_time"] = worker_data["first_connection_time"].strftime("%d %B %Y %H:%M:%S")
+            worker_data["last_connection_time"] = worker_data["first_connection_time"].strftime("%d %B %Y %H:%M:%S")
+
             workers_info.append(worker_data)
             total_processed += int(worker_data.get('total_processed_data', 0))
 
