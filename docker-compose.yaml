@@ -41,10 +41,10 @@ services:
       - postgres_data:/var/lib/postgresql/data
       # - ./postgresql.conf:/etc/postgresql/postgresql.conf
       # - ./pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
-    command: >
-      postgres
-      -c config_file=/etc/postgresql/postgresql.conf
-      -c hba_file=/var/lib/postgresql/data/pg_hba.conf
+    # command: >
+    #  postgres
+    #  -c config_file=/etc/postgresql/postgresql.conf
+    #  -c hba_file=/var/lib/postgresql/data/pg_hba.conf
     networks:
       - app-network
 
