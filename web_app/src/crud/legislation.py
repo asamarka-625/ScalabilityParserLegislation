@@ -18,8 +18,7 @@ async def sql_get_info(session: AsyncSession) -> Dict[str, int]:
             sa.select(
                 sa.func.count().label('total'),
                 sa.func.count(DataLegislation.binary_pdf).label('has_binary_pdf'),
-                sa.func.count(DataLegislation.text).label('has_text'),
-                sa.func.count(DataLegislation.loaded).label('loaded')
+                sa.func.count(DataLegislation.text).label('has_text')
             )
         )
         stats = stats_result.first()
@@ -27,8 +26,7 @@ async def sql_get_info(session: AsyncSession) -> Dict[str, int]:
         return {
             "total": stats.total,
             "has_binary_pdf": stats.has_binary_pdf,
-            "has_text": stats.has_text,
-            "loaded": stats.loaded
+            "has_text": stats.has_text
         }
 
     except SQLAlchemyError as e:

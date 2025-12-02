@@ -15,6 +15,7 @@ class RedisService:
         self.redis: Optional[redis.Redis] = None
         self.worker_prefix = "worker:"
         self.legislation_ids_key = "legislation_ids"
+        self.total_unloaded_data_key = "total_unloaded_data"
 
     async def init_redis(self):
         """Инициализация подключения к Redis"""
@@ -33,6 +34,15 @@ class RedisService:
 
         if self.redis:
             await self.redis.close()
+
+    async def add_unloaded_data(self, unloaded_count: int):
+        """Увеличиваем счетчик выгруженных данных"""
+        await self.redis.incrby(self.total_unloaded_data_key, unloaded_count)
+
+    async def get_unloaded_data(self):
+        """Получаем количество выгруженных данных"""
+        total_unloaded_count = await self.redis.get(self.total_unloaded_data_key)
+        return int(total_unloaded_count) if total_unloaded_count is not None else 0
 
     async def ping_worker(
         self,

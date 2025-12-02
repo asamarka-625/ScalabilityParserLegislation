@@ -85,12 +85,6 @@ class DataLegislation(Base):
         index=True,
         nullable=True
     )
-    loaded: so.Mapped[bool] = so.mapped_column(
-        sa.Boolean,
-        index=True,
-        nullable=False,
-        default=False
-    )
 
     authority_id: so.Mapped[int] = so.mapped_column(
         sa.Integer,
