@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 # Внутренние модули
 from web_app.src.crud import sql_get_info, sql_get_legislation_ids
-from web_app.src.schemas import InfoWorkerResponse, PingWorkerRequest, LegislationWorkerRequest, RemoveWorkerRequest
+from web_app.src.schemas import (InfoWorkerResponse, PingWorkerRequest, LegislationWorkerRequest,
+                                 RemoveWorkerRequest, UnloadDataRequest)
 from web_app.src.utils import redis_service
 from web_app.src.dependencies import get_client_ip
 
@@ -114,3 +115,13 @@ async def delete_worker(
         worker_id=data.worker_id
     )
     return {"message": message}
+
+
+@router.post(
+    path="/db/unloaded",
+    response_class=JSONResponse,
+    summary="Передаем данные о выгрузке"
+)
+async def unloaded_db(data: UnloadDataRequest):
+    await redis_service.add_unloaded_data(unloaded_count=data.count)
+    return {"status": "success"}
