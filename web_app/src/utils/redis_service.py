@@ -47,6 +47,7 @@ class RedisService:
     async def ping_worker(
         self,
         ip: str,
+        worker_id: int,
         processed_data: int,
         expire_seconds: int = 180,
         legislation_ids: Optional[List[int]] = None
@@ -70,7 +71,7 @@ class RedisService:
                 combined_ids_json
             )
 
-        key = f"{self.worker_prefix}{ip}"
+        key = f"{self.worker_prefix}{ip}:{worker_id}"
         current_time = datetime.now().isoformat()
 
         if await self.redis.exists(key):
@@ -88,6 +89,7 @@ class RedisService:
         else:
             worker_data = {
                 'ip': ip,
+                'worker_id': worker_id,
                 'first_connection_time': current_time,
                 'last_connection_time': current_time,
                 'total_processed_data': processed_data
@@ -102,9 +104,9 @@ class RedisService:
                 await pipeline.expire(key, expire_seconds)
                 await pipeline.execute()
 
-    async def delete_worker(self, ip: str) -> str:
+    async def delete_worker(self, ip: str, worker_id: int) -> str:
         """Удаление обработчика по IP с обновлением списка legislation_ids"""
-        key = f"{self.worker_prefix}{ip}"
+        key = f"{self.worker_prefix}{ip}:{worker_id}"
 
         # 1. Получаем данные воркера и вычисляем valid_legislation_ids
         if not await self.redis.exists(key):
@@ -207,6 +209,7 @@ class RedisService:
 
             info = InfoWorkerResponse(
                 ip=worker_data["ip"],
+                worker_id=int(worker_data["worker_id"]),
                 first_connection_time=first_connection_time.strftime("%d %B %Y %H:%M:%S"),
                 last_connection_time=last_connection_time.strftime("%d %B %Y %H:%M:%S"),
                 active_time=(datetime.min + (last_connection_time - first_connection_time)).strftime("%H:%M:%S"),

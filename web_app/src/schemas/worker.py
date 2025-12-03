@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 # Схема получения информации об обработчике
 class InfoWorkerResponse(BaseModel):
     ip: Annotated[str, Field(strict=True, strip_whitespace=True)]
+    worker_id: Annotated[int, Field(ge=0)]
     first_connection_time: Annotated[str, Field(strict=True, strip_whitespace=True)]
     last_connection_time: Annotated[str, Field(strict=True, strip_whitespace=True)]
     active_time: Annotated[str, Field(strict=True, strip_whitespace=True)]
@@ -14,10 +15,17 @@ class InfoWorkerResponse(BaseModel):
 
 # Схема запроса для получения ids законопроектов
 class LegislationWorkerRequest(BaseModel):
+    worker_id: Annotated[int, Field(ge=0)]
     limit: Annotated[int, Field(ge=1)]
 
 
 # Схема запроса пинга обработчика
 class PingWorkerRequest(BaseModel):
+    worker_id: Annotated[int, Field(ge=0)]
     processed_data: Annotated[int, Field(ge=0)]
     expire_seconds: Annotated[int, Field(ge=1)]
+
+
+# Схема запроса удаления обработчика
+class RemoveWorkerRequest(BaseModel):
+    worker_id: Annotated[int, Field(ge=0)]

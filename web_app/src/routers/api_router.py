@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 # Внутренние модули
 from web_app.src.crud import sql_get_info, sql_get_legislation_ids
-from web_app.src.schemas import InfoWorkerResponse, PingWorkerRequest, LegislationWorkerRequest
+from web_app.src.schemas import InfoWorkerResponse, PingWorkerRequest, LegislationWorkerRequest, RemoveWorkerRequest
 from web_app.src.utils import redis_service
 from web_app.src.dependencies import get_client_ip
 
@@ -92,7 +92,10 @@ async def ping_worker(
     data: PingWorkerRequest,
     client_ip: str = Depends(get_client_ip)
 ):
-    await redis_service.ping_worker(ip=client_ip, **data.model_dump())
+    await redis_service.ping_worker(
+        ip=client_ip,
+        **data.model_dump()
+    )
     return {"status": "success"}
 
 
@@ -101,6 +104,12 @@ async def ping_worker(
     response_class=JSONResponse,
     summary="Удаляем обработчик"
 )
-async def delete_worker(client_ip: str = Depends(get_client_ip)):
-    message = await redis_service.delete_worker(ip=client_ip)
+async def delete_worker(
+        data: RemoveWorkerRequest,
+        client_ip: str = Depends(get_client_ip)
+):
+    message = await redis_service.delete_worker(
+        ip=client_ip,
+        worker_id=data.worker_id
+    )
     return {"message": message}
