@@ -160,7 +160,7 @@ class RedisService:
             except redis.WatchError:
                 # Если другой процесс изменил данные, повторяем всю операцию
                 config.logger.warning(f"Concurrency conflict for worker {ip}, retrying...")
-                return await self.delete_worker(ip)
+                return await self.delete_worker(ip=ip, worker_id=worker_id)
 
             finally:
                 await pipe.reset()
