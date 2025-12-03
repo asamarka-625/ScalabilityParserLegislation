@@ -76,6 +76,7 @@ async def get_legislation_ids(
 
     await redis_service.ping_worker(
         ip=client_ip,
+        worker_id=data.worker_id,
         processed_data=0,
         legislation_ids=legislation_ids
     )
