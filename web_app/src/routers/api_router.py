@@ -148,7 +148,7 @@ async def update_text_legislation(
     return {"status": "success"}
 
 
-@router.delete(
+@router.post(
     path="/worker/delete",
     response_class=JSONResponse,
     summary="Удаляем обработчик"
@@ -164,7 +164,7 @@ async def delete_worker(
     return {"message": message}
 
 
-@router.delete(
+@router.post(
     path="/legislation/ready/delete",
     response_class=JSONResponse,
     summary="Удаляем выгруженные законопроекты"
