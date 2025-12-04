@@ -7,7 +7,7 @@ from fastapi import HTTPException, status
 # Внутренние модули
 from web_app.src.core import config, connection
 from web_app.src.models import DataLegislation
-from web_app.src.schemas import SchemeBinaryLegislation, SchemeNumberLegislation, SchemeLegislation
+from web_app.src.schemas import SchemeBinaryLegislation, SchemeNumberLegislation, SchemeReadyLegislation
 
 
 # Выводим статистику по данным
@@ -191,21 +191,25 @@ async def sql_update_binary(
 
 # Выдаем готовые к выгрузке данные законопроектов для обработки
 @connection
-async def sql_get_ready_legislation(limit: int, session: AsyncSession) -> List[SchemeLegislation]:
+async def sql_get_ready_legislation(limit: int, session: AsyncSession) -> List[SchemeReadyLegislation]:
     try:
         legislation_result = await session.execute(
-            sa.select(DataLegislation)
+            sa.select(DataLegislation.id, DataLegislation.binary_pdf, DataLegislation.text)
             .where(
                 DataLegislation.binary_pdf != None,
                 DataLegislation.text != None
             )
             .limit(limit)
         )
-        legislation = legislation_result.scalars()
+        legislation = legislation_result.all()
 
         return [
-            SchemeLegislation(**l.to_dict())
-            for l in legislation
+            SchemeReadyLegislation(
+                id=legislation_id,
+                binary_pdf=binary_pdf,
+                text=text
+            )
+            for (legislation_id, binary_pdf, text) in legislation
         ]
 
     except SQLAlchemyError as e:

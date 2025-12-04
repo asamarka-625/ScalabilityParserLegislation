@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from web_app.src.crud import (sql_get_info, sql_get_free_legislation, sql_update_text, sql_update_binary,
                               sql_get_legislation_by_not_binary_pdf, sql_get_ready_legislation,
                               sql_delete_ready_legislation)
-from web_app.src.schemas import (InfoWorkerResponse, SchemeLegislation, SchemeTextLegislation,
+from web_app.src.schemas import (InfoWorkerResponse, SchemeReadyLegislation, SchemeTextLegislation,
                                  SchemeBinaryLegislation, RemoveWorkerRequest, SchemeNumberLegislation,
                                  SchemeDeleteLegislation)
 from web_app.src.utils import redis_service
@@ -101,7 +101,7 @@ async def get_not_binary_legislation():
 
 @router.get(
     path="/legislation/ready",
-    response_model=List[SchemeLegislation],
+    response_model=List[SchemeReadyLegislation],
     summary="Передаем данные о выгрузке"
 )
 async def get_ready_legislation(limit: int = 10):

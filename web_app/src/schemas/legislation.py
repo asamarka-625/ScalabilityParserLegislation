@@ -1,21 +1,15 @@
 # Внешние зависимости
-from typing import Annotated, List, Optional
+from typing import Annotated, List
 from datetime import datetime
 import base64
 from pydantic import BaseModel, Field, field_serializer, field_validator
 
 
 # Схема данных законодательства
-class SchemeLegislation(BaseModel):
+class SchemeReadyLegislation(BaseModel):
     id: Annotated[int, Field(ge=1)]
-    name: Annotated[str, Field(strict=True, strip_whitespace=True)]
-    publication_number: Annotated[str, Field(strict=True, strip_whitespace=True)]
-    publication_date: datetime
-    link_pdf: Annotated[str, Field(strict=True, strip_whitespace=True)]
-    binary_pdf: Optional[bytes]
-    text: Optional[Annotated[str, Field(strict=True, strip_whitespace=True)]]
-    law_number: Optional[Annotated[str, Field(strict=True, strip_whitespace=True)]]
-    authority_id: Annotated[int, Field(ge=1)]
+    binary_pdf: bytes
+    text: Annotated[str, Field(strict=True, strip_whitespace=True)]
 
     @field_serializer('binary_pdf')
     def serialize_binary_pdf(self, binary_pdf: bytes, _info):
