@@ -9,7 +9,7 @@ from web_app.src.crud import (sql_get_info, sql_get_free_legislation, sql_update
 from web_app.src.schemas import (InfoWorkerResponse, SchemeLegislation, SchemeTextLegislation,
                                  SchemeBinaryLegislation, RemoveWorkerRequest, SchemeNumberLegislation,
                                  SchemeDeleteLegislation)
-from web_app.src.utils import redis_service
+from web_app.src.utils import redis_service, get_binary_bytes
 from web_app.src.dependencies import get_client_ip
 
 
@@ -117,9 +117,10 @@ async def get_ready_legislation(limit: int = 10):
 async def update_binary_legislation(
         data: SchemeBinaryLegislation
 ):
+    binary = get_binary_bytes(data.binary)
     await sql_update_binary(
         legislation_id=data.id,
-        content=data.binary
+        content=binary
     )
 
     return {"status": "success"}

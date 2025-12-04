@@ -34,13 +34,7 @@ class SchemeTextLegislation(BaseModel):
 # Схема бинарных данных pdf файла законодательства
 class SchemeBinaryLegislation(BaseModel):
     id: Annotated[int, Field(ge=1)]
-    binary: bytes
-
-    @field_serializer('binary')
-    def serialize_binary(self, binary: bytes, _info):
-        if binary:
-            return base64.b64encode(binary).decode('utf-8')
-        raise ValueError("Not binary data")
+    binary: str
 
 
 # Схема публикационного номера законопроекта
