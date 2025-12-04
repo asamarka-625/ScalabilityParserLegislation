@@ -213,8 +213,6 @@ async def sql_get_ready_legislation(limit: int, session: AsyncSession) -> List[S
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error")
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         config.logger.error(f"Unexpected error reading ready legislation: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unexpected server error")
 
