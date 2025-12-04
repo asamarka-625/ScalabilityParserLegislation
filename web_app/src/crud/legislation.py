@@ -201,7 +201,7 @@ async def sql_get_ready_legislation(limit: int, session: AsyncSession) -> List[S
             )
             .limit(limit)
         )
-        legislation = legislation_result.all()
+        legislation = legislation_result.scalars()
 
         return [
             SchemeLegislation(**l.to_dict())
