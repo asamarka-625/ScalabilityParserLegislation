@@ -80,7 +80,7 @@ class DataLegislation(Base):
         sa.Text,
         nullable=True
     )
-    law_number: so.Mapped[str] = so.mapped_column(
+    law_number: so.Mapped[Optional[str]] = so.mapped_column(
         sa.String(16),
         index=True,
         nullable=True
