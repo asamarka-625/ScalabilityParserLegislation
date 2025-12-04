@@ -1,5 +1,6 @@
 # Внешние зависимости
 from typing import Dict, List
+import base64
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
@@ -8,6 +9,13 @@ from fastapi import HTTPException, status
 from web_app.src.core import config, connection
 from web_app.src.models import DataLegislation
 from web_app.src.schemas import SchemeBinaryLegislation, SchemeNumberLegislation, SchemeReadyLegislation
+
+
+def get_binary_bytes(binary: str) -> bytes:
+    try:
+        return base64.b64decode(binary)
+    except Exception:
+        raise ValueError("Invalid base64 string")
 
 
 # Выводим статистику по данным
@@ -165,7 +173,7 @@ async def sql_get_legislation_by_not_binary_pdf(
 @connection
 async def sql_update_binary(
         legislation_id: int,
-        content: bytes,
+        content: str,
         session: AsyncSession
 ) -> None:
     try:
@@ -175,7 +183,7 @@ async def sql_update_binary(
         )
 
         legislation = legislation_results.scalar_one()
-        legislation.binary_pdf = content
+        legislation.binary_pdf = get_binary_bytes(content)
         await session.commit()
 
     except NoResultFound:
