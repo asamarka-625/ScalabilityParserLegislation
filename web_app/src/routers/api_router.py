@@ -83,7 +83,7 @@ async def get_free_legislation(
         ip=client_ip,
         worker_id=worker_id,
         processed_data=0,
-        legislation_ids=[l[0] for l in legislation]
+        legislation_ids=[l.id for l in legislation]
     )
 
     return legislation

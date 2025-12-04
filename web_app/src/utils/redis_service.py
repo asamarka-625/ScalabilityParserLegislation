@@ -49,7 +49,7 @@ class RedisService:
         ip: str,
         worker_id: int,
         processed_data: int,
-        expire_seconds: int = 180,
+        expire_seconds: int = 3600,
         legislation_ids: Optional[List[int]] = None
     ):
         """Сохранение/обновление обработчика в Redis"""
