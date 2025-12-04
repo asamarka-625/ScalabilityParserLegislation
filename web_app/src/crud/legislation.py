@@ -181,7 +181,7 @@ async def sql_update_binary(
             sa.select(DataLegislation)
             .where(DataLegislation.id == legislation_id)
         )
-
+        print(f"UPDATE id {legislation_id}")
         legislation = legislation_results.scalar_one()
         legislation.binary_pdf = get_binary_bytes(content)
         await session.commit()
