@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     lifespan=lifespan,
-    max_request_size=100 * 1024 * 1024 # 100MB
+    max_request_size=1000 * 1024 * 1024 # 1000MB
 )
 
 # Подключение маршрутов
