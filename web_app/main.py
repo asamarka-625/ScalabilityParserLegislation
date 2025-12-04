@@ -28,7 +28,10 @@ async def lifespan(app: FastAPI):
     await shutdown()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    max_request_size=100 * 1024 * 1024 # 100MB
+)
 
 # Подключение маршрутов
 app.include_router(router)
