@@ -13,19 +13,6 @@ class InfoWorkerResponse(BaseModel):
     total_processed_data: Annotated[int, Field(ge=0)]
 
 
-# Схема запроса для получения ids законопроектов
-class LegislationWorkerRequest(BaseModel):
-    worker_id: Annotated[int, Field(ge=0)]
-    limit: Annotated[int, Field(ge=1)]
-
-
-# Схема запроса пинга обработчика
-class PingWorkerRequest(BaseModel):
-    worker_id: Annotated[int, Field(ge=0)]
-    processed_data: Annotated[int, Field(ge=0)]
-    expire_seconds: Annotated[int, Field(ge=1)]
-
-
 # Схема запроса удаления обработчика
 class RemoveWorkerRequest(BaseModel):
     worker_id: Annotated[int, Field(ge=0)]

@@ -3,9 +3,12 @@ from typing import List
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 # Внутренние модули
-from web_app.src.crud import sql_get_info, sql_get_legislation_ids
-from web_app.src.schemas import (InfoWorkerResponse, PingWorkerRequest, LegislationWorkerRequest,
-                                 RemoveWorkerRequest, UnloadDataRequest)
+from web_app.src.crud import (sql_get_info, sql_get_free_legislation, sql_update_text, sql_update_binary,
+                              sql_get_legislation_by_not_binary_pdf, sql_get_ready_legislation,
+                              sql_delete_ready_legislation)
+from web_app.src.schemas import (InfoWorkerResponse, SchemeLegislation, SchemeTextLegislation,
+                                 SchemeBinaryLegislation, RemoveWorkerRequest, SchemeNumberLegislation,
+                                 SchemeDeleteLegislation)
 from web_app.src.utils import redis_service
 from web_app.src.dependencies import get_client_ip
 
@@ -59,56 +62,90 @@ async def get_info_from_workers():
     return result
 
 
-@router.post(
-    path="/legislation/ids",
-    response_class=JSONResponse,
-    summary="Возвращаем ids законопроектов, которые можно обработать"
+@router.get(
+    path="/legislation/free",
+    response_model=List[SchemeBinaryLegislation],
+    summary="Возвращаем данные законопроектов, которые можно обработать"
 )
-async def get_legislation_ids(
-    data: LegislationWorkerRequest,
+async def get_free_legislation(
+    worker_id: int,
+    limit: int = 10,
     client_ip: str = Depends(get_client_ip)
 ):
     reservation_legislation_ids = await redis_service.get_legislation_ids()
 
-    legislation_ids = await sql_get_legislation_ids(
+    legislation = await sql_get_free_legislation(
         reservation_legislation_ids=reservation_legislation_ids,
-        limit=data.limit
+        limit=limit
+    )
+
+    await redis_service.ping_worker(
+        ip=client_ip,
+        worker_id=worker_id,
+        processed_data=0,
+        legislation_ids=[l[0] for l in legislation]
+    )
+
+    return legislation
+
+
+@router.patch(
+    path="/legislation/update/text",
+    response_class=JSONResponse,
+    summary="Обновляем текст законопроекта"
+)
+async def update_text_legislation(
+        data: SchemeTextLegislation,
+        client_ip: str = Depends(get_client_ip)
+):
+    await sql_update_text(
+        legislation_id=data.id,
+        content=data.text
     )
 
     await redis_service.ping_worker(
         ip=client_ip,
         worker_id=data.worker_id,
-        processed_data=0,
-        legislation_ids=legislation_ids
+        processed_data=1
     )
 
-    return {"legislation_ids": legislation_ids}
-
-
-@router.post(
-    path="/worker/ping",
-    response_class=JSONResponse,
-    summary="Пингуем обработчик"
-)
-async def ping_worker(
-    data: PingWorkerRequest,
-    client_ip: str = Depends(get_client_ip)
-):
-    await redis_service.ping_worker(
-        ip=client_ip,
-        **data.model_dump()
-    )
     return {"status": "success"}
 
 
-@router.post(
+@router.get(
+    path="/legislation/not_binary",
+    response_model=List[SchemeNumberLegislation],
+    summary="Возвращаем публикационные номера законопроектов, которые не имеют бинарных данных"
+)
+async def get_not_binary_legislation():
+    legislation = await sql_get_legislation_by_not_binary_pdf
+    return legislation
+
+
+@router.patch(
+    path="/legislation/update/binary",
+    response_class=JSONResponse,
+    summary="Обновляем бинарные данные pdf файла законопроекта"
+)
+async def update_binary_legislation(
+        data: SchemeBinaryLegislation
+):
+    await sql_update_binary(
+        legislation_id=data.id,
+        content=data.binary
+    )
+
+    return {"status": "success"}
+
+
+@router.delete(
     path="/worker/delete",
     response_class=JSONResponse,
     summary="Удаляем обработчик"
 )
 async def delete_worker(
-        data: RemoveWorkerRequest,
-        client_ip: str = Depends(get_client_ip)
+    data: RemoveWorkerRequest,
+    client_ip: str = Depends(get_client_ip)
 ):
     message = await redis_service.delete_worker(
         ip=client_ip,
@@ -117,11 +154,24 @@ async def delete_worker(
     return {"message": message}
 
 
-@router.post(
-    path="/db/unloaded",
-    response_class=JSONResponse,
+@router.get(
+    path="/legislation/ready",
+    response_model=List[SchemeLegislation],
     summary="Передаем данные о выгрузке"
 )
-async def unloaded_db(data: UnloadDataRequest):
-    await redis_service.add_unloaded_data(unloaded_count=data.count)
-    return {"status": "success"}
+async def get_ready_legislation(limit: int = 10):
+    legislation = await sql_get_ready_legislation(limit=limit)
+    return legislation
+
+
+@router.patch(
+    path="/legislation/ready/delete",
+    response_class=JSONResponse,
+    summary="Удаляем выгруженные законопроекты"
+)
+async def update_text_legislation(data: SchemeDeleteLegislation):
+    delete_count = await sql_delete_ready_legislation(legislation_ids=data.ids)
+
+    await redis_service.add_unloaded_data(unloaded_count=delete_count)
+
+    return {"status": "success", "delete_count": delete_count}
