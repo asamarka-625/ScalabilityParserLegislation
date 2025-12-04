@@ -2,7 +2,7 @@
 from typing import Annotated, List
 from datetime import datetime
 import base64
-from pydantic import BaseModel, Field, field_serializer
+from pydantic import BaseModel, Field, field_serializer, field_validator
 
 
 # Схема данных законодательства
@@ -35,6 +35,15 @@ class SchemeTextLegislation(BaseModel):
 class SchemeBinaryLegislation(BaseModel):
     id: Annotated[int, Field(ge=1)]
     binary: str
+
+    @field_validator('binary', mode='before')
+    @classmethod
+    def validate_binary(cls, v):
+        # Если приходит bytes, декодируем в base64 строку
+        if isinstance(v, bytes):
+            return base64.b64encode(v).decode('utf-8')
+        # Если приходит str, возвращаем как есть (ожидаем base64 строку)
+        return v
 
 
 # Схема публикационного номера законопроекта

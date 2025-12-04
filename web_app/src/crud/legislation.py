@@ -8,7 +8,6 @@ from fastapi import HTTPException, status
 from web_app.src.core import config, connection
 from web_app.src.models import DataLegislation
 from web_app.src.schemas import SchemeBinaryLegislation, SchemeNumberLegislation, SchemeLegislation
-from web_app.src.utils import get_base_64_from_bytes
 
 
 # Выводим статистику по данным
@@ -61,7 +60,7 @@ async def sql_get_free_legislation(
         return [
             SchemeBinaryLegislation(
                 id=legislation_id,
-                binary=get_base_64_from_bytes(legislation_binary)
+                binary=legislation_binary
             )
             for (legislation_id, legislation_binary) in legislation
         ]
