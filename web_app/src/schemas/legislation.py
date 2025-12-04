@@ -17,6 +17,12 @@ class SchemeLegislation(BaseModel):
     law_number: Annotated[str, Field(strict=True, strip_whitespace=True)]
     authority_id: Annotated[int, Field(ge=1)]
 
+    @field_serializer('binary_pdf')
+    def serialize_binary_pdf(self, binary_pdf: bytes, _info):
+        if binary_pdf:
+            return base64.b64encode(binary_pdf).decode('utf-8')
+        raise ValueError("Not binary data")
+
 
 # Схема текста законодательства
 class SchemeTextLegislation(BaseModel):
@@ -30,11 +36,12 @@ class SchemeBinaryLegislation(BaseModel):
     id: Annotated[int, Field(ge=1)]
     binary: bytes
 
-    @field_serializer('binary_pdf')
-    def serialize_binary_pdf(self, binary_pdf: bytes, _info):
-        if binary_pdf:
-            return base64.b64encode(binary_pdf).decode('utf-8')
+    @field_serializer('binary')
+    def serialize_binary(self, binary: bytes, _info):
+        if binary:
+            return base64.b64encode(binary).decode('utf-8')
         raise ValueError("Not binary data")
+
 
 # Схема публикационного номера законопроекта
 class SchemeNumberLegislation(BaseModel):
