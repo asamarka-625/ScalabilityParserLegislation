@@ -89,6 +89,42 @@ async def get_free_legislation(
     return legislation
 
 
+@router.get(
+    path="/legislation/not_binary",
+    response_model=List[SchemeNumberLegislation],
+    summary="Возвращаем публикационные номера законопроектов, которые не имеют бинарных данных"
+)
+async def get_not_binary_legislation():
+    legislation = await sql_get_legislation_by_not_binary_pdf
+    return legislation
+
+
+@router.get(
+    path="/legislation/ready",
+    response_model=List[SchemeLegislation],
+    summary="Передаем данные о выгрузке"
+)
+async def get_ready_legislation(limit: int = 10):
+    legislation = await sql_get_ready_legislation(limit=limit)
+    return legislation
+
+
+@router.patch(
+    path="/legislation/update/binary",
+    response_class=JSONResponse,
+    summary="Обновляем бинарные данные pdf файла законопроекта"
+)
+async def update_binary_legislation(
+        data: SchemeBinaryLegislation
+):
+    await sql_update_binary(
+        legislation_id=data.id,
+        content=data.binary
+    )
+
+    return {"status": "success"}
+
+
 @router.patch(
     path="/legislation/update/text",
     response_class=JSONResponse,
@@ -112,32 +148,6 @@ async def update_text_legislation(
     return {"status": "success"}
 
 
-@router.get(
-    path="/legislation/not_binary",
-    response_model=List[SchemeNumberLegislation],
-    summary="Возвращаем публикационные номера законопроектов, которые не имеют бинарных данных"
-)
-async def get_not_binary_legislation():
-    legislation = await sql_get_legislation_by_not_binary_pdf
-    return legislation
-
-
-@router.patch(
-    path="/legislation/update/binary",
-    response_class=JSONResponse,
-    summary="Обновляем бинарные данные pdf файла законопроекта"
-)
-async def update_binary_legislation(
-        data: SchemeBinaryLegislation
-):
-    await sql_update_binary(
-        legislation_id=data.id,
-        content=data.binary
-    )
-
-    return {"status": "success"}
-
-
 @router.delete(
     path="/worker/delete",
     response_class=JSONResponse,
@@ -154,17 +164,7 @@ async def delete_worker(
     return {"message": message}
 
 
-@router.get(
-    path="/legislation/ready",
-    response_model=List[SchemeLegislation],
-    summary="Передаем данные о выгрузке"
-)
-async def get_ready_legislation(limit: int = 10):
-    legislation = await sql_get_ready_legislation(limit=limit)
-    return legislation
-
-
-@router.patch(
+@router.delete(
     path="/legislation/ready/delete",
     response_class=JSONResponse,
     summary="Удаляем выгруженные законопроекты"
