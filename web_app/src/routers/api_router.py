@@ -1,5 +1,6 @@
 # Внешние зависимости
-from typing import List
+from typing import Annotated, List
+from pydantic import Field
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 # Внутренние модули
@@ -69,7 +70,7 @@ async def get_info_from_workers():
 )
 async def get_free_legislation(
     worker_id: int,
-    limit: int = 10,
+    limit: Annotated[int, Field(ge=1)] = 10,
     client_ip: str = Depends(get_client_ip)
 ):
     reservation_legislation_ids = await redis_service.get_legislation_ids()
@@ -94,8 +95,10 @@ async def get_free_legislation(
     response_model=List[SchemeNumberLegislation],
     summary="Возвращаем публикационные номера законопроектов, которые не имеют бинарных данных"
 )
-async def get_not_binary_legislation():
-    legislation = await sql_get_legislation_by_not_binary_pdf
+async def get_not_binary_legislation(
+    limit: Annotated[int, Field(ge=1)] = 10_000
+):
+    legislation = await sql_get_legislation_by_not_binary_pdf(limit=limit)
     return legislation
 
 

@@ -135,12 +135,14 @@ async def sql_update_text(
 # Выводим все законы, у которых нет байт-кода PDF файла
 @connection
 async def sql_get_legislation_by_not_binary_pdf(
-        session: AsyncSession
+    limit: int,
+    session: AsyncSession
 ) -> List[SchemeNumberLegislation]:
     try:
         legislation_results = await session.execute(
             sa.select(DataLegislation.id, DataLegislation.publication_number)
             .where(DataLegislation.binary_pdf == None)
+            .limit(limit)
         )
 
         legislation = legislation_results.all()

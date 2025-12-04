@@ -1,6 +1,5 @@
 # Внешние зависимости
 from typing import Annotated, List
-from datetime import datetime
 import base64
 from pydantic import BaseModel, Field, field_serializer, field_validator
 
