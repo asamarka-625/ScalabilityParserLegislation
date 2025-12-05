@@ -29,6 +29,8 @@ async def get_info_from_db():
     stats = await sql_get_info()
     total_unloaded_count = await redis_service.get_total_unloaded_data()
 
+    stats["total"] += total_unloaded_count
+
     return {
         "Всего записей": stats["total"],
         "Записей с бинарными данными документов": stats["has_binary_pdf"],

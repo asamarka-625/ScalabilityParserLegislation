@@ -3,7 +3,7 @@ from fastapi import Request
 
 
 # Dependency для получения IP клиента
-def get_real_client_ip(request: Request) -> str:
+def get_client_ip(request: Request) -> str:
     # Проверяем все возможные заголовки
     forwarded_for = request.headers.get("X-Forwarded-For")
     if forwarded_for:
