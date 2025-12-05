@@ -18,7 +18,3 @@ docker-compose.yml
 
 # Git
 .git
-
-# Nginx
-nginx.conf
-promapp
