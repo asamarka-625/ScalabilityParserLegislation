@@ -2,7 +2,11 @@
 from typing import Optional, List
 from datetime import datetime
 import json
+import time
+import asyncio
+from contextlib import asynccontextmanager
 import redis.asyncio as redis
+from fastapi import status, HTTPException
 # Внутренние модули
 from web_app.src.core import config
 from web_app.src.schemas import InfoWorkerResponse
@@ -16,6 +20,7 @@ class RedisService:
         self.worker_prefix = "worker:"
         self.legislation_ids_key = "legislation_ids"
         self.total_unloaded_data_key = "total_unloaded_data"
+        self.lock_key = "lock"
 
     async def init_redis(self):
         """Инициализация подключения к Redis"""
@@ -34,6 +39,52 @@ class RedisService:
 
         if self.redis:
             await self.redis.close()
+
+    @asynccontextmanager
+    async def lock(self, ttl: int = 30, wait_timeout: int = 10):
+        """Создает блокировку как контекстный менеджер"""
+        acquired = await self._acquire_lock_with_wait(
+            ttl=ttl,
+            wait_timeout=wait_timeout
+        )
+
+        if not acquired:
+            config.logger.error(f"Failed to obtain lock within {wait_timeout} seconds")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to obtain lock")
+
+        try:
+            yield
+        finally:
+            await self._release_lock()
+
+    async def _acquire_lock_with_wait(
+        self,
+        ttl: int,
+        wait_timeout: int
+    ) -> bool:
+        """
+        Пытаемся получить блокировку с ожиданием
+        """
+        start_time = time.time()
+
+        while time.time() - start_time < wait_timeout:
+            acquired = await self.redis.set(
+                self.lock_key,
+                "1",
+                ex=ttl,
+                nx=True
+            )
+
+            if acquired:
+                return True
+
+            await asyncio.sleep(0.1)
+
+        return False
+
+    async def _release_lock(self) -> None:
+        """Снимаем блокировку"""
+        await self.redis.delete(self.lock_key)
 
     async def add_unloaded_data(self, unloaded_count: int):
         """Увеличиваем счетчик выгруженных данных"""

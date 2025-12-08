@@ -75,21 +75,22 @@ async def get_free_legislation(
     limit: Annotated[int, Field(ge=1)] = 10,
     client_ip: str = Depends(get_client_ip)
 ):
-    reservation_legislation_ids = await redis_service.get_legislation_ids()
+    async with redis_service.lock():
+        reservation_legislation_ids = await redis_service.get_legislation_ids()
 
-    legislation = await sql_get_free_legislation(
-        reservation_legislation_ids=reservation_legislation_ids,
-        limit=limit
-    )
+        legislation = await sql_get_free_legislation(
+            reservation_legislation_ids=reservation_legislation_ids,
+            limit=limit
+        )
 
-    await redis_service.ping_worker(
-        ip=client_ip,
-        worker_id=worker_id,
-        processed_data=0,
-        legislation_ids=[l.id for l in legislation]
-    )
+        await redis_service.ping_worker(
+            ip=client_ip,
+            worker_id=worker_id,
+            processed_data=0,
+            legislation_ids=[l.id for l in legislation]
+        )
 
-    return legislation
+        return legislation
 
 
 @router.get(
